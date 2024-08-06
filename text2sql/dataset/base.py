@@ -1,10 +1,11 @@
 import json
-import torch 
+import torch
 from typing import Optional
 from abc import abstractmethod, ABC
 
 import torch.utils
 import torch.utils.data
+
 
 class BaseDataInstance(ABC):
     """A DataInstance is a particular blob of data which should contain
@@ -41,20 +42,25 @@ class BaseDataInstance(ABC):
         return str(json.dumps(self.data, indent=4))
 
     @abstractmethod
-    def schema_prompt(self):
+    def schema_prompt(self) -> str:
         """This method should return a prompt for the schema of the database
         which is used in the prompt.
         """
         return NotImplementedError
 
     @abstractmethod
-    def instruction_prompt(self, question: str):
+    def question_prompt(self, question: str) -> str:
         """This method should return a prompt for the instruction of the
         question which is used in the prompt.
         """
         return NotImplementedError
 
-    def additional_prompt(self):
+    @abstractmethod
+    def add_few_shot_examples(self, k: int) -> str:
+        """This method should return a prompt for the few shot examples which is used in the prompt."""
+        return NotImplementedError
+
+    def additional_prompt(self) -> str:
         """This method should return a prompt for the additional knowledge
         which is used in the prompt. This will go inside the end of the prompt
         after instruction and schema.

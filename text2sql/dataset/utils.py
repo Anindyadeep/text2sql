@@ -1,9 +1,9 @@
-import os 
+import os
 import re
 import json
 import shutil
 import sqlite3
-import requests 
+import requests
 from tqdm import tqdm
 from pathlib import Path
 from zipfile import ZipFile
@@ -18,16 +18,17 @@ logger = setup_console_logger(name="[DATA-UTILS]")
 # BIRDBench utility functions
 # It has been modified a bit to make it more readable and to remove the unnecessary parts
 
-# Set of Commands for train 
+# Set of Commands for train
 # unzip train.zip
 # cd train
-# unzip train_databases.zip 
+# unzip train_databases.zip
 # rm -rf __MACOSX
 # rm -rf train_databases.zip
 
+
 def _bird_bench_train_dataset_steps(download_path: Path, force: Optional[bool] = False):
     url = "https://bird-bench.oss-cn-beijing.aliyuncs.com/train.zip"
-    
+
     zip_file = download_path / "train.zip"
     inner_zips = download_path / "train"
     inner_zip_file = download_path / "train_databases.zip"
@@ -35,7 +36,6 @@ def _bird_bench_train_dataset_steps(download_path: Path, force: Optional[bool] =
     inner_train_databases = unzip_dir / "train_databases"
     macosx_dir = download_path / "__MACOSX"
     inner_macosx_dir = download_path / "train_databases" / "__MACOSX"
-
 
     if not (download_path).exists() or force:
         if not zip_file.exists():
@@ -45,8 +45,8 @@ def _bird_bench_train_dataset_steps(download_path: Path, force: Optional[bool] =
             response = requests.get(url)
             with open(zip_file, "wb") as f:
                 f.write(response.content)
-        
-        # Do the initial extraction 
+
+        # Do the initial extraction
         logger.info("=> Extracting BirdBench training dataset.")
         with ZipFile(zip_file, "r") as zip_ref:
             zip_ref.extractall(download_path)
@@ -59,7 +59,7 @@ def _bird_bench_train_dataset_steps(download_path: Path, force: Optional[bool] =
         # Now move all contents from download_path / train to download_path
         for file in inner_zips.iterdir():
             shutil.move(file, download_path)
-        
+
         # Now remove download_path / train
         shutil.rmtree(inner_zips, ignore_errors=True)
 
@@ -74,7 +74,7 @@ def _bird_bench_train_dataset_steps(download_path: Path, force: Optional[bool] =
             shutil.rmtree(inner_macosx_dir, ignore_errors=True)
 
         # first rename download_path / train_databases to download_path / tmp
-        # then move the folder inside download_path / tmp to download_path 
+        # then move the folder inside download_path / tmp to download_path
         # and delete download_path / tmp
         tmp_dir = download_path / "tmp"
         inner_train_databases.rename(tmp_dir)
@@ -85,18 +85,15 @@ def _bird_bench_train_dataset_steps(download_path: Path, force: Optional[bool] =
         logger.info("=> Finished extraction.")
 
     else:
-        logger.info(
-            "=> Dataset for training [BirdBench trainset] already exists."
-        )
-
+        logger.info("=> Dataset for training [BirdBench trainset] already exists.")
 
 
 def _bird_bench_dev_dataset_steps(download_path: Path, force: Optional[bool] = False):
     url = "https://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip"
-    zip_file =  download_path / "dev.zip"
+    zip_file = download_path / "dev.zip"
     unzip_dir = download_path / "dev_20240627"
-    inner_zip_file = unzip_dir/ "dev_databases.zip"
-    macosx_dir = download_path/ "__MACOSX"
+    inner_zip_file = unzip_dir / "dev_databases.zip"
+    macosx_dir = download_path / "__MACOSX"
 
     if not (download_path).exists() or force:
         logger.info(
@@ -106,7 +103,7 @@ def _bird_bench_dev_dataset_steps(download_path: Path, force: Optional[bool] = F
 
         with open(zip_file, "wb") as f:
             f.write(response.content)
-        
+
         # Now extract
         with ZipFile(zip_file, "r") as zip_ref:
             zip_ref.extractall(download_path)
@@ -116,37 +113,47 @@ def _bird_bench_dev_dataset_steps(download_path: Path, force: Optional[bool] = F
             zip_ref.extractall(unzip_dir)
         os.remove(inner_zip_file)
 
-        # Move things 
+        # Move things
         for item in os.listdir(unzip_dir):
             shutil.move(unzip_dir / item, download_path)
         os.rmdir(unzip_dir)
 
         if macosx_dir.exists():
             shutil.rmtree(macosx_dir, ignore_errors=True)
-        
-        logger.info("=> Finished downloading the dataset for evaluation [BirdBench devset].")
+
+        logger.info(
+            "=> Finished downloading the dataset for evaluation [BirdBench devset]."
+        )
     else:
         logger.info("=> Dataset for evaluation [BirdBench devset] already exists.")
-    
+
 
 def download_and_process_bird_dataset(
     split: Optional[str] = "train",
     download_folder: Optional[str] = "./data",
     force: Optional[bool] = False,
 ):
+    assert split in ["train", "validation"], "Invalid split name"
+
     download_folder = Path(download_folder)
     download_path = download_folder / "bird" / split
-    
+
     if not download_path.exists():
         download_path.mkdir(parents=True, exist_ok=True)
-    
+
     if split == "train":
         _bird_bench_train_dataset_steps(download_path, force)
     else:
         _bird_bench_dev_dataset_steps(download_path, force)
-    
-    # TODO: Now parse the blobs and return the dataset
 
+    data_split = "train" if split == "train" else "dev"
+    dataset = json.load(open(download_path / f"{data_split}.json", "r"))
+
+    for blob in dataset:
+        blob["db_path"] = str(
+            download_path / "dev_databases" / blob["db_id"] / f"{blob['db_id']}.sqlite"
+        )
+    return dataset
 
 
 # WikiSQL utility functions
@@ -162,6 +169,7 @@ def sanitize_column_name_for_wikisql(column_name: str) -> str:
         sanitized_name = sanitized_name + "_"
     return sanitized_name
 
+
 def ensure_unique_column_names(columns):
     seen = {}
     unique_columns = []
@@ -172,6 +180,7 @@ def ensure_unique_column_names(columns):
         seen[new_col] = 1
         unique_columns.append(new_col)
     return unique_columns
+
 
 def _process_wikisql_tables(raw_dataset, download_path: Path, split: str):
     dataset = []
@@ -203,10 +212,13 @@ def _process_wikisql_tables(raw_dataset, download_path: Path, split: str):
 
         # Create the table schema
         try:
-            if cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name=?;", 
-                (table_name,)
-            ).fetchone() is None:
+            if (
+                cursor.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name=?;",
+                    (table_name,),
+                ).fetchone()
+                is None
+            ):
                 create_table_sql = f"""
                     CREATE TABLE {content['table']} (
                         {', '.join([f'{col} {type_}' for col, type_ in zip(
@@ -242,7 +254,7 @@ def _process_wikisql_tables(raw_dataset, download_path: Path, split: str):
     return dataset
 
 
-def process_wikisql_modified_dataset(
+def download_and_process_wikisql_dataset(
     download_folder: Optional[str] = "./data",
     split: Optional[str] = "train",
     force: Optional[bool] = False,
@@ -253,11 +265,16 @@ def process_wikisql_modified_dataset(
     if not download_path.exists() or force:
         download_path.mkdir(parents=True, exist_ok=True)
 
-    raw_dataset = load_dataset("Salesforce/wikisql")[split]
-    dataset = _process_wikisql_tables(raw_dataset, download_path, split)
-    
-    # Write this list of dict jsonl using json.dump
-    with open(download_path / "split.json", "w") as f:
-        json.dump(dataset, f, indent=4)
-    logger.info(f"Finished processing the WikiSQL {split} dataset.")
+        raw_dataset = load_dataset("Salesforce/wikisql")[split]
+        dataset = _process_wikisql_tables(raw_dataset, download_path, split)
+
+        # Write this list of dict jsonl using json.dump
+        with open(download_path / f"{split}.json", "w") as f:
+            json.dump(dataset, f, indent=4)
+
+        logger.info(f"Finished processing the WikiSQL {split} dataset.")
+
+    else:
+        logger.info(f"WikiSQL {split} dataset already exists.")
+        dataset = json.load(open(download_path / f"{split}.json", "r"))
     return dataset
