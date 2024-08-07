@@ -38,6 +38,7 @@ def _bird_bench_train_dataset_steps(download_path: Path, force: Optional[bool] =
     inner_macosx_dir = download_path / "train_databases" / "__MACOSX"
 
     if not (download_path).exists() or force:
+        download_path.mkdir(parents=True, exist_ok=True)
         if not zip_file.exists():
             logger.info(
                 "=> Starting to download the dataset for training [BirdBench trainset]."
@@ -99,6 +100,7 @@ def _bird_bench_dev_dataset_steps(download_path: Path, force: Optional[bool] = F
         logger.info(
             "=> Starting to download the dataset for evaluation [BirdBench devset]."
         )
+        download_path.mkdir(parents=True, exist_ok=True)
         response = requests.get(url)
 
         with open(zip_file, "wb") as f:
@@ -137,9 +139,6 @@ def download_and_process_bird_dataset(
 
     download_folder = Path(download_folder)
     download_path = download_folder / "bird" / split
-
-    if not download_path.exists():
-        download_path.mkdir(parents=True, exist_ok=True)
 
     if split == "train":
         _bird_bench_train_dataset_steps(download_path, force)

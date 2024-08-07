@@ -78,6 +78,8 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
     possible to either iterate over the dataset or get a particular instance
     and compatible for both training and evaluation.
     """
+    # TODO: Need to put an __init__ here since some of things
+    # are getting repeated. 
 
     @abstractmethod
     def __len__(self):
@@ -88,3 +90,6 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
     def __getitem__(self, idx):
         """This method should return a particular instance of the dataset"""
         return NotImplementedError
+
+    def preprocess(self):
+        """This method is used to preprocess the dataset before passing to the model. Mostly required during making the dataset during training."""

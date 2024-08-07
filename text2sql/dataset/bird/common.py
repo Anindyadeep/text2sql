@@ -1,6 +1,6 @@
 import json
 import sqlite3
-from tqdm import tqdm 
+from tqdm import tqdm
 from textwrap import dedent
 from typing import Optional
 from tabulate import tabulate
@@ -66,14 +66,14 @@ class BirdDevInstance(BaseDataInstance):
 
                 # Make a simple table representation before adding to the prompt
                 # using tabulate
-        
+
                 table_representation = tabulate(
                     rows, headers=[column[1] for column in columns]
                 )
             except Exception:
                 table = ""
                 table_representation = ""
-            
+
             few_shot_examples.append(f"Table: {table}\n----\n{table_representation}")
         return dedent("\n\n".join(few_shot_examples))
 
