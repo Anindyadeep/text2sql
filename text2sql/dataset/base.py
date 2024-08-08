@@ -1,8 +1,8 @@
 import json
-import torch
+from abc import ABC, abstractmethod
 from typing import Optional
-from abc import abstractmethod, ABC
 
+import torch
 import torch.utils
 import torch.utils.data
 
@@ -78,8 +78,9 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
     possible to either iterate over the dataset or get a particular instance
     and compatible for both training and evaluation.
     """
+
     # TODO: Need to put an __init__ here since some of things
-    # are getting repeated. 
+    # are getting repeated.
 
     @abstractmethod
     def __len__(self):

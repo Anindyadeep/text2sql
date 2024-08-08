@@ -1,17 +1,18 @@
+import json
 import os
 import re
-import json
 import shutil
 import sqlite3
-import requests
-from tqdm import tqdm
 from pathlib import Path
-from zipfile import ZipFile
 from typing import Optional
-from datasets import load_dataset
+from zipfile import ZipFile
 
-from text2sql.logger import setup_console_logger
+import requests
+from datasets import load_dataset
+from tqdm import tqdm
+
 from text2sql.constants import RESERVED_KEYWORDS
+from text2sql.logger import setup_console_logger
 
 logger = setup_console_logger(name="[DATA-UTILS]")
 
@@ -150,7 +151,10 @@ def download_and_process_bird_dataset(
 
     for blob in dataset:
         blob["db_path"] = str(
-            download_path / "dev_databases" / blob["db_id"] / f"{blob['db_id']}.sqlite"
+            download_path
+            / f"{data_split}_databases"
+            / blob["db_id"]
+            / f"{blob['db_id']}.sqlite"
         )
     return dataset
 

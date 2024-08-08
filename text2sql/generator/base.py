@@ -1,8 +1,10 @@
 import json
-from tqdm import tqdm
+from abc import ABC, abstractmethod
 from pathlib import Path
-from abc import abstractmethod, ABC
-from typing import Optional, Any, List
+from typing import Any, List, Optional
+
+from tqdm import tqdm
+
 from text2sql.logger import setup_console_logger
 
 logger = setup_console_logger(name="[GENERATOR]")
