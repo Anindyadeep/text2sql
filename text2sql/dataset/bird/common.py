@@ -212,7 +212,9 @@ class BirdDatasetBase(BaseDataset):
         )
 
         self.tokenizer = (
-            AutoTokenizer.from_pretrained(model_name_or_path, token=hf_token)
+            AutoTokenizer.from_pretrained(
+                model_name_or_path, padding_size="right", use_fast=False, token=hf_token
+            )
             if model_name_or_path
             else None
         )
