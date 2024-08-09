@@ -5,6 +5,8 @@
 3. Cleanup WikiSQL for hault now (since it can be done later)
 4. Make the HF dataset for BIRD and write fine-tuning scripts
 5. Then start with Gretel AI with the same format (but only for training). This will be done for an another run. 
+6. There should be an embedding based retrieval too
+7. save the tokenized dataset somewhere if possible 
 
 
 WikiSQL Arc:
