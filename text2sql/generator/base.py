@@ -39,7 +39,7 @@ class BaseGenerator(ABC):
             logger.info(f"Experiment folder found in: {self.experiment_path}")
 
     @abstractmethod
-    def generate(self, data_blob: dict, **kwargs: Optional[Any]) -> str:
+    def generate(self, data_blob: dict, **kwargs: Optional[Any]) -> dict:
         """The main generation logic
 
         Arguments
