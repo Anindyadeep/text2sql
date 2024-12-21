@@ -1,6 +1,7 @@
-# PremSQL
+# PremSQL | Easy to use fully local RAG on Databases
 
-End-to-End Local-First Text-to-SQL Pipelines
+[![PyPI Downloads](https://static.pepy.tech/badge/premsql)](https://pepy.tech/projects/premsql)
+<a href="https://huggingface.co/premai-io/prem-1B-SQL"><img src="https://img.shields.io/badge/HuggingFace (10K+) -yellow"></a>
 
 PremSQL is an open-source library designed to help developers create secure, fully local Text-to-SQL solutions using small language models. It provides all the essential tools to build and deploy end-to-end Text-to-SQL pipelines with customizable components, making it ideal for secure, autonomous AI-powered data analysis.
 
@@ -488,3 +489,17 @@ Stay tuned for these exciting updates! We encourage you to contribute and provid
 ## 📝 License
 
 PremSQL is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+
+## ☘️ Citation
+
+```
+@misc{Anindyadeep2024PremSQL,
+  author = {Anindyadeep},
+  title = {PremSQL: End-to-End Local-First Text-to-SQL Pipelines},
+  year = {2024},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/premAI-io/premsql}},
+  note = {Accessed: 2024-12-10}
+}
+```
